@@ -187,36 +187,43 @@ struct parse_function_definition_impl : public lexertk::parser_helper
       }
 
       std::size_t body_begin = current_token().position;
-      std::size_t body_end   = body_begin;
+      std::size_t body_end   = current_token().position;
 
-      if (!token_is(token_t::e_lcrlbracket))
+      int bracket_stack = 0;
+
+      if (!token_is(token_t::e_lcrlbracket,false))
          return false;
-
-      int bracket_stack = 1;
 
       for ( ; ; )
       {
          body_end = current_token().position;
 
-         if (token_is(token_t::e_rcrlbracket))
-            bracket_stack--;
-         else if (token_is(token_t::e_lcrlbracket))
+         if (token_is(token_t::e_lcrlbracket))
             bracket_stack++;
+         else if (token_is(token_t::e_rcrlbracket))
+         {
+            if (0 == --bracket_stack)
+               break;
+         }
          else
+         {
+            if (lexer().finished())
+               return false;
+
             next_token();
-
-         if (0 == bracket_stack)
-            break;
-
-         if (lexer().finished())
-            return false;
+         }
       }
 
-      const std::size_t size  = body_end - body_begin + 1;
+      std::size_t size = body_end - body_begin + 1;
 
       fd.body = func_def.substr(body_begin,size);
 
-      func_def = lexer().remaining();
+      const std::size_t index = body_begin + size;
+
+      if (index < func_def.size())
+         func_def = func_def.substr(index,func_def.size() - index);
+      else
+         func_def = "";
 
       return true;
    }
