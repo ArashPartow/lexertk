@@ -248,6 +248,7 @@ void example06()
       "function foo7(x,y) { if (x < '}}}') { x+y; x+=1;} else {x;} }        "
       "function foo8(x,y,z) { if (x < '}}}') { x+y; x+=1;} else {x;} }      "
       "function foo9(x,y,z,w) { if (x < '}}}') { x+y; w+=1;} else {x; w;} } "
+      "function foo10(x,y,z,w) { if (x < '\\'}\\'}\\'}\\'') { x+y; w+=1;} else {x; w;} } "
       "function foox( )       {  } "
       "function fooy(x)       {  } "
       "function fooz(x,y)     {  } "
