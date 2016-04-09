@@ -4,7 +4,7 @@
  *                                                               *
  * Lexer Examples                                                *
  * Author: Arash Partow (2001)                                   *
- * URL: http://www.partow.net/programming/lexer/index.html       *
+ * URL: http://www.partow.net/programming/lexertk/index.html     *
  *                                                               *
  * Copyright notice:                                             *
  * Free use of the Simple C++ Lexer Toolkit Library is permitted *
