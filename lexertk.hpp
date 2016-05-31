@@ -679,10 +679,11 @@ namespace lexertk
             7. 123.456e-3
             8. 123.456E-3
          */
-         const char* begin      = s_itr_;
-         bool dot_found         = false;
-         bool e_found           = false;
-         bool post_e_sign_found = false;
+         const char* begin       = s_itr_;
+         bool dot_found          = false;
+         bool e_found            = false;
+         bool post_e_sign_found  = false;
+         bool post_e_digit_found = false;
          token_t t;
 
          while (!is_end(s_itr_))
@@ -724,7 +725,7 @@ namespace lexertk
                ++s_itr_;
                continue;
             }
-            else if (e_found && details::is_sign(*s_itr_))
+            else if (e_found && details::is_sign(*s_itr_) && !post_e_digit_found)
             {
                if (post_e_sign_found)
                {
@@ -735,6 +736,13 @@ namespace lexertk
 
                post_e_sign_found = true;
                ++s_itr_;
+               continue;
+            }
+            else if (e_found && details::is_digit(*s_itr_))
+            {
+               post_e_digit_found = true;
+               ++s_itr_;
+
                continue;
             }
             else if (('.' != (*s_itr_)) && !details::is_digit(*s_itr_))
