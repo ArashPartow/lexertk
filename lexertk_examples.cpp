@@ -191,7 +191,7 @@ struct parse_function_definition_impl : public lexertk::parser_helper
 
       int bracket_stack = 0;
 
-      if (!token_is(token_t::e_lcrlbracket,false))
+      if (!token_is(token_t::e_lcrlbracket,e_hold))
          return false;
 
       for ( ; ; )

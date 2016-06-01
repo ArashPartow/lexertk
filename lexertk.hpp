@@ -1694,45 +1694,52 @@ namespace lexertk
          return current_token_;
       }
 
-      inline bool token_is(const token_t::token_type& ttype,
-                           const bool advance_token = true)
+      enum token_advance_mode
       {
-         if (current_token_.type != ttype)
+         e_hold    = 0,
+         e_advance = 1
+      };
+
+      inline void advance_token(const token_advance_mode mode)
+      {
+         if (e_advance == mode)
+         {
+            next_token();
+         }
+      }
+
+      inline bool token_is(const token_t::token_type& ttype, const token_advance_mode mode = e_advance)
+      {
+         if (current_token().type != ttype)
          {
             return false;
          }
 
-         if (advance_token)
-         {
-            next_token();
-         }
+         advance_token(mode);
 
          return true;
       }
 
       inline bool token_is(const token_t::token_type& ttype,
                            const std::string& value,
-                           const bool advance_token = true)
+                           const token_advance_mode mode = e_advance)
       {
          if (
-              (current_token_.type != ttype) ||
+              (current_token().type != ttype) ||
               !details::imatch(value,current_token().value)
             )
          {
             return false;
          }
 
-         if (advance_token)
-         {
-            next_token();
-         }
+         advance_token(mode);
 
          return true;
       }
 
       inline bool token_is_then_assign(const token_t::token_type& ttype,
                                        std::string& token,
-                                       const bool advance_token = true)
+                                       const token_advance_mode mode = e_advance)
       {
          if (current_token_.type != ttype)
          {
@@ -1741,10 +1748,7 @@ namespace lexertk
 
          token = current_token_.value;
 
-         if (advance_token)
-         {
-            next_token();
-         }
+         advance_token(mode);
 
          return true;
       }
@@ -1753,7 +1757,7 @@ namespace lexertk
                 template <typename,typename> class Container>
       inline bool token_is_then_assign(const token_t::token_type& ttype,
                                        Container<std::string,Allocator>& token_list,
-                                       const bool advance_token = true)
+                                       const token_advance_mode mode = e_advance)
       {
          if (current_token_.type != ttype)
          {
@@ -1762,10 +1766,7 @@ namespace lexertk
 
          token_list.push_back(current_token_.value);
 
-         if (advance_token)
-         {
-            next_token();
-         }
+         advance_token(mode);
 
          return true;
       }
