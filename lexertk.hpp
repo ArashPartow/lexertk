@@ -7,9 +7,8 @@
  *                                                               *
  * Copyright notice:                                             *
  * Free use of the Simple C++ Lexer Toolkit Library is permitted *
- * under the guidelines and in accordance with the most current  *
- * version of the Common Public License.                         *
- * http://www.opensource.org/licenses/cpl1.0.php                 *
+ * under the guidelines and in accordance with the MIT License.  *
+ * http://www.opensource.org/licenses/MIT                        *
  *                                                               *
  *                                                               *
  * The lexer will tokenize input against the following BNF:      *
@@ -569,6 +568,7 @@ namespace lexertk
       inline void scan_token()
       {
          skip_whitespace();
+
          skip_comments();
 
          if (is_end(s_itr_))
@@ -670,14 +670,20 @@ namespace lexertk
       {
          /*
             Attempt to match a valid numeric value in one of the following formats:
-            1. 123456
-            2. 123.456
-            3. 123.456e3
-            4. 123.456E3
-            5. 123.456e+3
-            6. 123.456E+3
-            7. 123.456e-3
-            8. 123.456E-3
+            01. 123456
+            02. 123.456
+            03. 123.456e3
+            04. 123.456E3
+            05. 123.456e+3
+            06. 123.456E+3
+            07. 123.456e-3
+            08. 123.456E-3
+            09. .1234
+            10. .1234e3
+            11. .1234E+3
+            12. .1234e+3
+            13. .1234E-3
+            14. .1234e-3
          */
          const char* begin       = s_itr_;
          bool dot_found          = false;
@@ -694,10 +700,13 @@ namespace lexertk
                {
                   t.set_error(token::e_err_number,begin,s_itr_,base_itr_);
                   token_list_.push_back(t);
+
                   return;
                }
+
                dot_found = true;
                ++s_itr_;
+
                continue;
             }
             else if (details::imatch('e',(*s_itr_)))
@@ -708,6 +717,7 @@ namespace lexertk
                {
                   t.set_error(token::e_err_number,begin,s_itr_,base_itr_);
                   token_list_.push_back(t);
+
                   return;
                }
                else if (
@@ -718,11 +728,13 @@ namespace lexertk
                {
                   t.set_error(token::e_err_number,begin,s_itr_,base_itr_);
                   token_list_.push_back(t);
+
                   return;
                }
 
                e_found = true;
                ++s_itr_;
+
                continue;
             }
             else if (e_found && details::is_sign(*s_itr_) && !post_e_digit_found)
@@ -731,11 +743,13 @@ namespace lexertk
                {
                   t.set_error(token::e_err_number,begin,s_itr_,base_itr_);
                   token_list_.push_back(t);
+
                   return;
                }
 
                post_e_sign_found = true;
                ++s_itr_;
+
                continue;
             }
             else if (e_found && details::is_digit(*s_itr_))
@@ -752,32 +766,39 @@ namespace lexertk
          }
 
          t.set_numeric(begin,s_itr_,base_itr_);
+
          token_list_.push_back(t);
+
          return;
       }
 
       inline void scan_string()
       {
          const char* begin = s_itr_ + 1;
+
          token_t t;
+
          if (std::distance(s_itr_,s_end_) < 2)
          {
             t.set_error(token::e_err_string,s_itr_,s_end_,base_itr_);
             token_list_.push_back(t);
+
             return;
          }
+
          ++s_itr_;
 
          bool escaped_found = false;
-         bool escaped = false;
+         bool escaped       = false;
 
          while (!is_end(s_itr_))
          {
             if (!escaped && ('\\' == *s_itr_))
             {
                escaped_found = true;
-               escaped = true;
+               escaped       = true;
                ++s_itr_;
+
                continue;
             }
             else if (!escaped)
@@ -787,6 +808,7 @@ namespace lexertk
             }
             else if (escaped)
                escaped = false;
+
             ++s_itr_;
          }
 
@@ -794,6 +816,7 @@ namespace lexertk
          {
             t.set_error(token::e_err_string,begin,s_itr_,base_itr_);
             token_list_.push_back(t);
+
             return;
          }
 
@@ -867,6 +890,7 @@ namespace lexertk
                   case 1 :
                            {
                               const token& t0 = g.token_list_[i];
+
                               if (!operator()(t0)) return i;
                            }
                            break;
@@ -875,6 +899,7 @@ namespace lexertk
                            {
                               const token& t0 = g.token_list_[i    ];
                               const token& t1 = g.token_list_[i + 1];
+
                               if (!operator()(t0,t1)) return i;
                            }
                            break;
@@ -884,6 +909,7 @@ namespace lexertk
                               const token& t0 = g.token_list_[i    ];
                               const token& t1 = g.token_list_[i + 1];
                               const token& t2 = g.token_list_[i + 2];
+
                               if (!operator()(t0,t1,t2)) return i;
                            }
                            break;
@@ -894,6 +920,7 @@ namespace lexertk
                               const token& t1 = g.token_list_[i + 1];
                               const token& t2 = g.token_list_[i + 2];
                               const token& t3 = g.token_list_[i + 3];
+
                               if (!operator()(t0,t1,t2,t3)) return i;
                            }
                            break;
@@ -1050,6 +1077,7 @@ namespace lexertk
             {
                g.token_list_[i] = t;
                g.token_list_.erase(g.token_list_.begin() + (i + 1));
+
                ++changes;
             }
          }
@@ -1145,49 +1173,55 @@ namespace lexertk
             //': =' --> ':='
             if ((t0.type == lexertk::token::e_colon) && (t1.type == lexertk::token::e_eq))
             {
-               t.type = lexertk::token::e_assign;
-               t.value = ":=";
+               t.type     = lexertk::token::e_assign;
+               t.value    = ":=";
                t.position = t0.position;
+
                return true;
             }
             //'> =' --> '>='
             else if ((t0.type == lexertk::token::e_gt) && (t1.type == lexertk::token::e_eq))
             {
-               t.type = lexertk::token::e_gte;
-               t.value = ">=";
+               t.type     = lexertk::token::e_gte;
+               t.value    = ">=";
                t.position = t0.position;
+
                return true;
             }
             //'< =' --> '<='
             else if ((t0.type == lexertk::token::e_lt) && (t1.type == lexertk::token::e_eq))
             {
-               t.type = lexertk::token::e_lte;
-               t.value = "<=";
+               t.type     = lexertk::token::e_lte;
+               t.value    = "<=";
                t.position = t0.position;
+
                return true;
             }
             //'= =' --> '=='
             else if ((t0.type == lexertk::token::e_eq) && (t1.type == lexertk::token::e_eq))
             {
-               t.type = lexertk::token::e_eq;
-               t.value = "==";
+               t.type     = lexertk::token::e_eq;
+               t.value    = "==";
                t.position = t0.position;
+
                return true;
             }
             //'! =' --> '!='
             else if ((static_cast<char>(t0.type) == '!') && (t1.type == lexertk::token::e_eq))
             {
-               t.type = lexertk::token::e_ne;
-               t.value = "!=";
+               t.type     = lexertk::token::e_ne;
+               t.value    = "!=";
                t.position = t0.position;
+
                return true;
             }
             //'< >' --> '<>'
             else if ((t0.type == lexertk::token::e_lt) && (t1.type == lexertk::token::e_gt))
             {
-               t.type = lexertk::token::e_ne;
-               t.value = "<>";
+               t.type     = lexertk::token::e_ne;
+               t.value    = "<>";
                t.position = t0.position;
+
                return true;
             }
             else
@@ -1224,10 +1258,11 @@ namespace lexertk
 
          bool operator()(const lexertk::token& t)
          {
-            if (!t.value.empty()                         &&
-                (lexertk::token::e_string != t.type)     &&
-                (lexertk::token::e_symbol != t.type)     &&
-                details::is_bracket(t.value[0])
+            if (
+                 !t.value.empty()                         &&
+                 (lexertk::token::e_string != t.type)     &&
+                 (lexertk::token::e_symbol != t.type)     &&
+                 details::is_bracket(t.value[0])
                )
             {
                char c = t.value[0];
@@ -1241,12 +1276,14 @@ namespace lexertk
                   {
                      state_ = false;
                      error_token_ = t;
+
                      return false;
                   }
                   else if (c != stack_.top())
                   {
                      state_ = false;
                      error_token_ = t;
+
                      return false;
                   }
                   else
@@ -1320,6 +1357,7 @@ namespace lexertk
                {
                   t.value = itr->second.first;
                   t.type  = itr->second.second;
+
                   return true;
                }
             }
@@ -1558,7 +1596,6 @@ namespace lexertk
          inline bool run_modifiers(lexertk::generator& g)
          {
             error_token_modifier = reinterpret_cast<lexertk::token_modifier*>(0);
-            bool result = true;
 
             for (std::size_t i = 0; i < token_modifier_list.size(); ++i)
             {
@@ -1570,17 +1607,17 @@ namespace lexertk
                if (!modifier.result())
                {
                   error_token_modifier = token_modifier_list[i];
+
                   return false;
                }
             }
 
-            return result;
+            return true;
          }
 
          inline bool run_joiners(lexertk::generator& g)
          {
             error_token_joiner = reinterpret_cast<lexertk::token_joiner*>(0);
-            bool result = true;
 
             for (std::size_t i = 0; i < token_joiner_list.size(); ++i)
             {
@@ -1592,37 +1629,39 @@ namespace lexertk
                if (!joiner.result())
                {
                   error_token_joiner = token_joiner_list[i];
+
                   return false;
                }
             }
 
-            return result;
+            return true;
          }
 
          inline bool run_inserters(lexertk::generator& g)
          {
             error_token_inserter = reinterpret_cast<lexertk::token_inserter*>(0);
-            bool result = true;
 
             for (std::size_t i = 0; i < token_inserter_list.size(); ++i)
             {
                lexertk::token_inserter& inserter = (*token_inserter_list[i]);
+
                inserter.reset();
                inserter.process(g);
+
                if (!inserter.result())
                {
                   error_token_inserter = token_inserter_list[i];
+
                   return false;
                }
             }
 
-            return result;
+            return true;
          }
 
          inline bool run_scanners(lexertk::generator& g)
          {
             error_token_scanner = reinterpret_cast<lexertk::token_scanner*>(0);
-            bool result = true;
 
             for (std::size_t i = 0; i < token_scanner_list.size(); ++i)
             {
@@ -1634,11 +1673,12 @@ namespace lexertk
                if (!scanner.result())
                {
                   error_token_scanner = token_scanner_list[i];
+
                   return false;
                }
             }
 
-            return result;
+            return true;
          }
 
          std::deque<lexertk::token_scanner*>  token_scanner_list;

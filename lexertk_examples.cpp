@@ -8,9 +8,8 @@
  *                                                               *
  * Copyright notice:                                             *
  * Free use of the Simple C++ Lexer Toolkit Library is permitted *
- * under the guidelines and in accordance with the most current  *
- * version of the Common Public License.                         *
- * http://www.opensource.org/licenses/cpl1.0.php                 *
+ * under the guidelines and in accordance with the MIT License.  *
+ * http://www.opensource.org/licenses/MIT                        *
  *                                                               *
  *****************************************************************
 */
